@@ -16,9 +16,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding SeedCommand}">Seed</Button>
+            <Button Command="{Binding TickCommand}">Tick</Button>
             <Button Command="{Binding StartCommand}">Start</Button>
             <Button Command="{Binding StopCommand}">Stop</Button>
             <TextBlock Text="{Binding Generation}"/>
+            <TextBlock Text="   ---   "/>
+            <TextBlock Text="{Binding NumberOfCells}"/>
             <CheckBox IsChecked="{Binding IsRunning, Mode=OneWay}" IsEnabled="False"></CheckBox>
         </StackPanel>
         <HelixToolkit:HelixViewport3D 

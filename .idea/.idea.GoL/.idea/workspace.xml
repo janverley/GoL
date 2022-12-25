@@ -4,7 +4,11 @@
     <projectFile>GoL.Client/GoL.Client.csproj</projectFile>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="95d5673a-be07-4088-8ccf-97cc4a16f2bf" name="Changes" comment="" />
+    <list default="true" id="95d5673a-be07-4088-8ccf-97cc4a16f2bf" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.GoL/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.GoL/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WpfApp1/MainWindow.xaml" beforeDir="false" afterPath="$PROJECT_DIR$/WpfApp1/MainWindow.xaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WpfApp1/ShellViewModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WpfApp1/ShellViewModel.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
