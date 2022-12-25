@@ -15,11 +15,13 @@ namespace WpfApp1
     {
         private readonly DispatcherTimer timer;
 
-        private const int xSize = 20;
-        private const int ySize = 20;
-        private const int zSize = 20;
+        private const int xSize = 200;
+        private const int ySize = 200;
+        private const int zSize = 1;
 
-        private byte[] cells2 = new byte[xSize * ySize * zSize];
+        private const int xyzSize = xSize * ySize * zSize;
+        
+        private byte[] cells2 = new byte[xyzSize];
 
         private int generation;
         private int numberOfCells;
@@ -28,7 +30,7 @@ namespace WpfApp1
         public ShellViewModel()
         {
             timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(0.5);
+            timer.Interval = TimeSpan.FromSeconds(0.01);
             timer.Tick += OnTick;
 
             StartCommand = new DelegateCommand(Start, CanStart);
@@ -38,25 +40,21 @@ namespace WpfApp1
 
             Objects = new ObservableCollection<Visual3D>();
             Objects.Add(new DefaultLights());
-            Objects.Add(new GridLinesVisual3D { Length = xSize, Width = ySize, MinorDistance = 1, MajorDistance = 1, Thickness = 0.01 });
+            // Objects.Add(new GridLinesVisual3D { Length = xSize, Width = ySize, MinorDistance = 1, MajorDistance = 1, Thickness = 0.01 });
 
             Seed();
         }
-
-        private static int Index(int x, int y, int z) => x + y * xSize + z * xSize * ySize;
 
         private void Seed()
         {
             KillAllCells();
 
             var rand = new Random();
-            var c = rand.Next(20, xSize * ySize * zSize / 10);
-            for (int i = 0; i < c; i++)
+            var c = rand.Next(20, xyzSize / 10);
+            for (var i = 0; i < c; i++)
             {
-                var x = rand.Next(0, xSize);
-                var y = rand.Next(0, ySize);
-                var z = rand.Next(0, zSize);
-                cells2[Index(x, y, z)] = 1;
+                var index = rand.Next(0, xyzSize);
+                cells2[index] = 1;
             }
 
             UpdateNumberOfLiveCells();
@@ -66,7 +64,7 @@ namespace WpfApp1
 
         private void KillAllCells()
         {
-            for (int i = 0; i < xSize * ySize * zSize; i++)
+            for (var i = 0; i < xyzSize; i++)
             {
                 cells2[i] = 0;
             }
@@ -75,18 +73,11 @@ namespace WpfApp1
         private void UpdateNumberOfLiveCells()
         {
             NumberOfCells = 0;
-            for (int ix = 0; ix < xSize; ix++)
+            for (var index = 0; index < xyzSize; index++)
             {
-                for (int iy = 0; iy < ySize; iy++)
+                if (IsAlive(index))
                 {
-                    for (int iz = 0; iz < zSize; iz++)
-                    {
-                        var index = Index(ix, iy, iz);
-                        if (IsAlive(index))
-                        {
-                            NumberOfCells++;
-                        }
-                    }
+                    NumberOfCells++;
                 }
             }
         }
@@ -94,11 +85,11 @@ namespace WpfApp1
 
         private BoxVisual3D FromCoordinate(int index)
         {
-            int z = (index / (xSize * ySize));
-            int zRest = (index % (xSize * ySize));
-            
-            int y = zRest / xSize;
-            
+            var z = (index / (xSize * ySize));
+            var zRest = (index % (xSize * ySize));
+
+            var y = zRest / xSize;
+
             var x = zRest % xSize;
             return new BoxVisual3D
             {
@@ -111,11 +102,11 @@ namespace WpfApp1
         {
             if (NumberOfLiveNeighbours(index) < 2)
             {
-                return Colors.Green;
+                return Colors.LightBlue;
             }
             else if (NumberOfLiveNeighbours(index) > 3)
             {
-                return Colors.DarkRed;
+                return Colors.Red;
             }
             else
             {
@@ -174,42 +165,29 @@ namespace WpfApp1
         private void CalculateNextGen()
         {
             Generation++;
-            var cellsNextGen2 = new byte[xSize * ySize * zSize];
+            var cellsNextGen2 = new byte[xyzSize];
 
-            for (int ix = 0; ix < xSize; ix++)
+            for (var index = 0; index < xyzSize; index++)
             {
-                for (int iy = 0; iy < ySize; iy++)
+                var numberOfLiveNeighbours = NumberOfLiveNeighbours(index);
+                if (IsAlive(index))
                 {
-                    for (int iz = 0; iz < zSize; iz++)
-                    {
-                        var index = Index(ix, iy, iz);
-                        var numberOfLiveNeighbours = NumberOfLiveNeighbours(index);
-                        if (IsAlive(index))
-                        {
-                            if (numberOfLiveNeighbours < 2)
-                                cellsNextGen2[index] = 0;
+                    if (numberOfLiveNeighbours < 2)
+                        cellsNextGen2[index] = 0;
 
-                            else if (numberOfLiveNeighbours == 2 || numberOfLiveNeighbours == 3)
-                                cellsNextGen2[index] = 1;
+                    else if (numberOfLiveNeighbours == 2 || numberOfLiveNeighbours == 3)
+                        cellsNextGen2[index] = 1;
 
-                            else if (numberOfLiveNeighbours > 3)
-                                cellsNextGen2[index] = 0;
-                        }
-                        else if (numberOfLiveNeighbours == 3)
-                            cellsNextGen2[index] = 1;
-                    }
+                    else if (numberOfLiveNeighbours > 3)
+                        cellsNextGen2[index] = 0;
                 }
+                else if (numberOfLiveNeighbours == 3)
+                    cellsNextGen2[index] = 1;
             }
 
-            for (int ix = 0; ix < xSize; ix++)
+            for (var index = 0; index < xyzSize; index++)
             {
-                for (int iy = 0; iy < ySize; iy++)
-                {
-                    for (int iz = 0; iz < zSize; iz++)
-                    {
-                        cells2[Index(ix, iy, iz)] = cellsNextGen2[Index(ix, iy, iz)];
-                    }
-                }
+                cells2[index] = cellsNextGen2[index];
             }
         }
 
@@ -222,18 +200,11 @@ namespace WpfApp1
                 Objects.Remove(cell);
             }
 
-            for (int ix = 0; ix < xSize; ix++)
+            for (var index = 0; index < xyzSize; index++)
             {
-                for (int iy = 0; iy < ySize; iy++)
+                if (IsAlive(index))
                 {
-                    for (int iz = 0; iz < zSize; iz++)
-                    {
-                        var index = Index(ix, iy, iz);
-                        if (IsAlive(index))
-                        {
-                            Objects.Add(FromCoordinate(index));
-                        }
-                    }
+                    Objects.Add(FromCoordinate(index));
                 }
             }
         }
@@ -242,9 +213,9 @@ namespace WpfApp1
         {
             if (index >= 0)
             {
-                if (index < xSize * ySize * zSize)
+                if (index < xyzSize)
                 {
-                    if (cells2[index] == 1) 
+                    if (cells2[index] == 1)
                         return true;
                 }
             }
@@ -261,7 +232,7 @@ namespace WpfApp1
                    (IsAlive(Behind(index)) ? 1 : 0);
         }
 
-        public static int Left(int index) => index -1;
+        public static int Left(int index) => index - 1;
         public static int Right(int index) => index + 1;
         public static int Up(int index) => index + xSize;
         public static int Down(int index) => index - xSize;
