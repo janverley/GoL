@@ -14,7 +14,7 @@ namespace WpfApp1
 
         private const int xyzSize = xSize * ySize * zSize;
 
-        private readonly byte[] cells2 = new byte[xyzSize];
+        private readonly byte[] cells = new byte[xyzSize];
 
         public IEnumerable<int> LiveCells
         {
@@ -22,7 +22,7 @@ namespace WpfApp1
             {
                 for (var i = 0; i < xyzSize; i++)
                 {
-                    if (cells2[i] == 1)
+                    if (cells[i] == 1)
                     {
                         yield return i;
                     }
@@ -40,7 +40,7 @@ namespace WpfApp1
             for (var i = 0; i < c; i++)
             {
                 var index = rand.Next(0, xyzSize);
-                cells2[index] = 1;
+                cells[index] = 1;
             }
 
 
@@ -51,7 +51,7 @@ namespace WpfApp1
         {
             for (var i = 0; i < xyzSize; i++)
             {
-                cells2[i] = 0;
+                cells[i] = 0;
             }
         }
 
@@ -83,31 +83,31 @@ namespace WpfApp1
 
         public int CalculateNextGen()
         {
-            var cellsNextGen2 = new byte[xyzSize];
+            var nextGenCells = new byte[xyzSize];
 
             for (var index = 0; index < xyzSize; index++)
             {
                 var numberOfLiveNeighbours = NumberOfLiveNeighbours(index);
-                if (IsAlive(index))
+                if (cells[index] == 1)
                 {
                     if (numberOfLiveNeighbours < 2)
                     {
-                        cellsNextGen2[index] = 0;
+                        nextGenCells[index] = 0;
                     }
 
                     else if (numberOfLiveNeighbours == 2 || numberOfLiveNeighbours == 3)
                     {
-                        cellsNextGen2[index] = 1;
+                        nextGenCells[index] = 1;
                     }
 
                     else if (numberOfLiveNeighbours > 3)
                     {
-                        cellsNextGen2[index] = 0;
+                        nextGenCells[index] = 0;
                     }
                 }
                 else if (numberOfLiveNeighbours == 3)
                 {
-                    cellsNextGen2[index] = 1;
+                    nextGenCells[index] = 1;
                 }
             }
 
@@ -115,8 +115,8 @@ namespace WpfApp1
 
             for (var index = 0; index < xyzSize; index++)
             {
-                cells2[index] = cellsNextGen2[index];
-                if (cells2[index] == 1)
+                cells[index] = nextGenCells[index];
+                if (cells[index] == 1)
                 {
                     count++;
                 }
@@ -183,7 +183,7 @@ namespace WpfApp1
             {
                 if (index < xyzSize)
                 {
-                    if (cells2[index] == 1)
+                    if (cells[index] == 1)
                     {
                         return true;
                     }
