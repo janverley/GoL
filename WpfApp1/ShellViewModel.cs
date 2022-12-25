@@ -15,8 +15,8 @@ namespace WpfApp1
     {
         private readonly DispatcherTimer timer;
 
-        private const int xSize = 200;
-        private const int ySize = 200;
+        private const int xSize = 300;
+        private const int ySize = 300;
         private const int zSize = 1;
 
         private const int xyzSize = xSize * ySize * zSize;
@@ -57,7 +57,7 @@ namespace WpfApp1
                 cells2[index] = 1;
             }
 
-            UpdateNumberOfLiveCells();
+            NumberOfCells = c;
 
             OnTick(this, EventArgs.Empty);
         }
@@ -70,23 +70,11 @@ namespace WpfApp1
             }
         }
 
-        private void UpdateNumberOfLiveCells()
-        {
-            NumberOfCells = 0;
-            for (var index = 0; index < xyzSize; index++)
-            {
-                if (IsAlive(index))
-                {
-                    NumberOfCells++;
-                }
-            }
-        }
 
-
-        private BoxVisual3D FromCoordinate(int index)
+        private BoxVisual3D CreateBox(int index)
         {
-            var z = (index / (xSize * ySize));
-            var zRest = (index % (xSize * ySize));
+            var z = index / (xSize * ySize);
+            var zRest = index % (xSize * ySize);
 
             var y = zRest / xSize;
 
@@ -100,18 +88,12 @@ namespace WpfApp1
 
         private Color ColorByNeighbours(int index)
         {
-            if (NumberOfLiveNeighbours(index) < 2)
-            {
-                return Colors.LightBlue;
-            }
-            else if (NumberOfLiveNeighbours(index) > 3)
-            {
-                return Colors.Red;
-            }
-            else
-            {
-                return Colors.Blue;
-            }
+            var numberOfLiveNeighbours = NumberOfLiveNeighbours(index);
+
+            return 
+                numberOfLiveNeighbours < 2 ? Colors.LightBlue : 
+                numberOfLiveNeighbours > 3 ? Colors.Red : 
+                Colors.Blue;
         }
 
         public DelegateCommand StopCommand { get; set; }
@@ -185,26 +167,32 @@ namespace WpfApp1
                     cellsNextGen2[index] = 1;
             }
 
+            var count = 0;
+
             for (var index = 0; index < xyzSize; index++)
             {
                 cells2[index] = cellsNextGen2[index];
+                if (cells2[index] == 1)
+                {
+                    count++;
+                }
             }
+            NumberOfCells = count;
         }
 
         private void RebuildBlocksFromCells()
         {
-            UpdateNumberOfLiveCells();
-
-            foreach (var cell in Objects.OfType<BoxVisual3D>().ToList())
+            var boxVisual3Ds = Objects.OfType<BoxVisual3D>().ToList();
+            foreach (var boxVisual3D in boxVisual3Ds)
             {
-                Objects.Remove(cell);
+                Objects.Remove(boxVisual3D);
             }
 
             for (var index = 0; index < xyzSize; index++)
             {
-                if (IsAlive(index))
+                if (cells2[index] == 1)
                 {
-                    Objects.Add(FromCoordinate(index));
+                    Objects.Add(CreateBox(index));
                 }
             }
         }
@@ -236,8 +224,8 @@ namespace WpfApp1
         public static int Right(int index) => index + 1;
         public static int Up(int index) => index + xSize;
         public static int Down(int index) => index - xSize;
-        public static int Before(int index) => index - (xSize * ySize);
-        public static int Behind(int index) => index + (xSize * ySize);
+        public static int Before(int index) => index - xSize * ySize;
+        public static int Behind(int index) => index + xSize * ySize;
 
         private int NumberOfLiveNeighboursInThisPlane(int index)
         {
